@@ -1,0 +1,72 @@
+syntax = "proto3";
+package vex;
+option go_package = "./pb";
+
+service VectorStore {
+  // Client-facing Coordinated RPCs (Scatter-Gather / Partition Routed)
+  rpc Insert       (InsertRequest)  returns (InsertResponse);
+  rpc Search       (SearchRequest)  returns (SearchResponse);
+  rpc Delete       (DeleteRequest)  returns (DeleteResponse);
+  rpc Get          (GetRequest)     returns (GetResponse);
+  rpc Health       (HealthRequest)  returns (HealthResponse);
+
+  // Internal Shard-level RPCs (Executed directly on the target node's local store)
+  rpc ShardInsert  (InsertRequest)  returns (InsertResponse);
+  rpc ShardSearch  (SearchRequest)  returns (SearchResponse);
+  rpc ShardDelete  (DeleteRequest)  returns (DeleteResponse);
+  rpc ShardGet     (GetRequest)     returns (GetResponse);
+}
+
+message InsertRequest {
+  string id              = 1;
+  repeated float vector  = 2;
+  bytes  payload         = 3;  
+}
+
+message InsertResponse {
+  bool success = 1;
+}
+
+message SearchRequest {
+  repeated float vector = 1;
+  int32  k              = 2;
+  int32  ef             = 3;
+}
+
+message SearchResult {
+  string id       = 1;
+  float  distance = 2;
+  bytes  payload  = 3;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+message GetRequest {
+  string id = 1;
+}
+
+message GetResponse {
+  bool found            = 1;
+  string id             = 2;
+  repeated float vector = 3;
+  bytes payload         = 4;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status         = 1;
+  int64  vector_count   = 2;
+  string node_id        = 3;
+  int32  cluster_nodes  = 4;
+}
