@@ -2,7 +2,6 @@ package coordinator
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -222,5 +221,4 @@ func TestNodeFailureSurvival(t *testing.T) {
 	if len(res) == 0 {
 		t.Fatalf("expected search results from surviving node, got 0")
 	}
-	fmt.Printf("Search successfully survived node kill! Returned %d results\n", len(res))
 }

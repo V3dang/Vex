@@ -63,7 +63,8 @@ func (d *delegate) LocalState(join bool) []byte {
 func (d *delegate) MergeRemoteState(buf []byte, join bool) {}
 
 type eventDelegate struct {
-	ring *ring.Ring
+	ring   *ring.Ring
+	logger *log.Logger
 }
 
 func parseMeta(node *memberlist.Node) ring.Node {
@@ -85,19 +86,25 @@ func parseMeta(node *memberlist.Node) ring.Node {
 
 func (e *eventDelegate) NotifyJoin(node *memberlist.Node) {
 	rNode := parseMeta(node)
-	log.Printf("[cluster] node joined gossip: id=%s grpc=%s addr=%s:%d", rNode.ID, rNode.GrpcAddr, node.Addr, node.Port)
+	if e.logger != nil {
+		e.logger.Printf("[cluster] node joined: id=%s grpc=%s", rNode.ID, rNode.GrpcAddr)
+	}
 	e.ring.AddNode(rNode)
 }
 
 func (e *eventDelegate) NotifyLeave(node *memberlist.Node) {
 	rNode := parseMeta(node)
-	log.Printf("[cluster] node left gossip: id=%s", rNode.ID)
+	if e.logger != nil {
+		e.logger.Printf("[cluster] node left: id=%s", rNode.ID)
+	}
 	_ = e.ring.RemoveNode(rNode.ID)
 }
 
 func (e *eventDelegate) NotifyUpdate(node *memberlist.Node) {
 	rNode := parseMeta(node)
-	log.Printf("[cluster] node updated: id=%s grpc=%s", rNode.ID, rNode.GrpcAddr)
+	if e.logger != nil {
+		e.logger.Printf("[cluster] node updated: id=%s grpc=%s", rNode.ID, rNode.GrpcAddr)
+	}
 	e.ring.AddNode(rNode)
 }
 
@@ -134,8 +141,15 @@ func New(cfg Config, r *ring.Ring) (*Cluster, error) {
 		mConfig.LogOutput = cfg.LogOutput
 	}
 
+	var eventLogger *log.Logger
+	if cfg.LogOutput != nil {
+		eventLogger = log.New(cfg.LogOutput, "", log.LstdFlags)
+	} else {
+		eventLogger = log.Default()
+	}
+
 	mConfig.Delegate = &delegate{meta: metaBytes}
-	mConfig.Events = &eventDelegate{ring: r}
+	mConfig.Events = &eventDelegate{ring: r, logger: eventLogger}
 
 	ml, err := memberlist.Create(mConfig)
 	if err != nil {

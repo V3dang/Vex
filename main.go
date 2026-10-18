@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	nethttp "net/http"
@@ -132,26 +131,15 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("[HTTP] REST API listening on http://%s", *httpAddr)
+		log.Printf("[HTTP] listening on http://%s", *httpAddr)
 		if err := httpServer.ListenAndServe(); err != nil && err != nethttp.ErrServerClosed {
 			log.Printf("[HTTP] error: %v", err)
 		}
 	}()
 
-	fmt.Printf(`
-╔═══════════════════════════════════════════════════════╗
-║   VEX - Distributed Vector Exchange (Running)         ║
-╠═══════════════════════════════════════════════════════╣
-║ Node ID    : %-41s║
-║ gRPC Addr  : %-41s║
-║ HTTP API   : %-41s║
-║ Gossip Addr: %-41s║
-║ Replicas   : %-41d║
-║ Quorum     : %-41d║
-╚═══════════════════════════════════════════════════════╝
-`, *nodeID, *grpcAddr, *httpAddr, *gossipAddr, *replicas, *quorum)
+	log.Printf("[vex] Node '%s' online (grpc=%s, http=%s, gossip=%s, replicas=%d, quorum=%d)",
+		*nodeID, *grpcAddr, *httpAddr, *gossipAddr, *replicas, *quorum)
 
-	// Graceful Shutdown
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	<-sigCh

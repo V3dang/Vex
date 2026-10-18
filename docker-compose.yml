@@ -1,0 +1,59 @@
+services:
+  vex-1:
+    build: .
+    command: >
+      -node-id node-1
+      -grpc-addr 0.0.0.0:7070
+      -http-addr 0.0.0.0:8080
+      -gossip-addr 0.0.0.0:7946
+      -data-dir /data
+      -replicas 2
+      -quorum 1
+    ports:
+      - "7071:7070"
+      - "8081:8080"
+    volumes:
+      - vex-data-1:/data
+
+  vex-2:
+    build: .
+    command: >
+      -node-id node-2
+      -grpc-addr 0.0.0.0:7070
+      -http-addr 0.0.0.0:8080
+      -gossip-addr 0.0.0.0:7946
+      -join vex-1:7946
+      -data-dir /data
+      -replicas 2
+      -quorum 1
+    ports:
+      - "7072:7070"
+      - "8082:8080"
+    depends_on:
+      - vex-1
+    volumes:
+      - vex-data-2:/data
+
+  vex-3:
+    build: .
+    command: >
+      -node-id node-3
+      -grpc-addr 0.0.0.0:7070
+      -http-addr 0.0.0.0:8080
+      -gossip-addr 0.0.0.0:7946
+      -join vex-1:7946
+      -data-dir /data
+      -replicas 2
+      -quorum 1
+    ports:
+      - "7073:7070"
+      - "8083:8080"
+    depends_on:
+      - vex-1
+    volumes:
+      - vex-data-3:/data
+
+volumes:
+  vex-data-1:
+  vex-data-2:
+  vex-data-3:

@@ -19,8 +19,6 @@ type Node struct {
 	Deleted bool
 }
 
-
-
 type Store struct {
 	index   *hnsw.Graph[string]
 	meta    map[string]*Node // ID -> full node with payload
