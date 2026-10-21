@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafafa;
+  --foreground: #09090b;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-sky-800: #075985;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-dot-pattern {
+    background-image: radial-gradient(#d4d4d8 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
+  }
+}
